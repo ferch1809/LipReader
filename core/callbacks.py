@@ -36,7 +36,7 @@ class ProducePrediction(tf.keras.callbacks.Callback):
 def scheduler(epoch, lr):
             return lr if epoch < 30 else lr * tf.math.exp(-0.1)
 
-def train(dataset_path=None, speakers=None, shuffle_buffer=500, batch_size=2, img_c=3, img_w=100, img_h=50, frames_n=75, align_len=40):
+def train(dataset_path=None, speakers=None, epochs=100, shuffle_buffer=500, batch_size=2, img_c=3, img_w=100, img_h=50, frames_n=75, align_len=40):
         lip_gen = Generator(dataset_path, batch_size, img_c, img_w, img_h, frames_n, align_len)
         lipreader = LipReaderModel(img_c, img_w, img_h, frames_n, align_len)
 
@@ -48,5 +48,16 @@ def train(dataset_path=None, speakers=None, shuffle_buffer=500, batch_size=2, im
         schedule_callback = LearningRateScheduler(scheduler)
         pred_callback = ProducePrediction(test, align_len)
 
-        model.fit(train, validation_data=test, epochs=100, steps_per_epoch=lip_gen.train_batches, validation_steps=lip_gen.validation_steps, verbose=2, callbacks=[checkpoint_callback, schedule_callback, pred_callback])
+        model.fit(
+              train, 
+              validation_data=test, 
+              epochs=epochs, 
+              steps_per_epoch=lip_gen.train_batches, 
+              validation_steps=lip_gen.validation_steps, 
+              verbose=2, 
+              callbacks=[
+                    checkpoint_callback, 
+                    schedule_callback, 
+                    pred_callback
+                ])
         model.summary()

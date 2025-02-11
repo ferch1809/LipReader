@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-import os
 import tensorflow as tf
 tf.keras.backend.clear_session()
 
