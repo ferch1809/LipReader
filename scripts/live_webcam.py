@@ -2,18 +2,17 @@
 # --- Add project root to sys.path ---
 import sys
 import os
-import numpy as np
+import cv2
 
 sys.path.append(os.path.abspath(os.path.dirname(__file__) + "/.."))
 # ------------------------------------
 
-import cv2
-from preprocessing.mouth_extraction import extract_mouth_region
-from utils.kalman_filter import KalmanFilter
+from core.videos import Video
+
+# "~/.dlib/shape_predictor_68_face_landmarks.dat"
 
 def main():
     cap = cv2.VideoCapture(0)
-    kalman_filter = KalmanFilter()
 
     if not cap.isOpened():
         print("Cannot Open Camera!")
@@ -23,6 +22,7 @@ def main():
     cap.set(cv2.CAP_PROP_FRAME_WIDTH, 640)
     cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 480)
 
+    video = Video(face_predictor_path="~/.dlib/shape_predictor_68_face_landmarks.dat")
     while True:
         # Capture frame-by-frame
         ret, frame = cap.read()
@@ -32,7 +32,7 @@ def main():
             print("Can't receive frame (stream end?). Exiting ...")
             break
         # Operations on the frame come here
-        mouth_roi = extract_mouth_region(frame, kalman=kalman_filter)
+        mouth_roi = video.extract_mouth_region(frame)
 
         # Display the mouth ROI
         if mouth_roi is not None:

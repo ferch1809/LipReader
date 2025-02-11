@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 import os
 import tensorflow as tf
+tf.keras.backend.clear_session()
 
 # Memory growth for specific GPU
 gpus = tf.config.list_physical_devices('GPU')
@@ -15,30 +16,15 @@ if gpus:
     # Memory growth must be set before GPUs have been initialized
     print(e)
 
+from core.callbacks import train
 
-from tensorflow.keras.callbacks import ModelCheckpoint, LearningRateScheduler
-from tensorflow.keras.optimizers import Adam
-
-from architectures.dnn import create_dnn_architecture
-from data.data_pipeline import data_pipeline_func
-
-from architectures.dnn import CTCLoss
-from architectures.dnn import scheduler
-from architectures.dnn import ProduceExample
+DATASET_PATH = '/mnt/netac_ssd/gridcorpus'
+BATCH_SIZE = 1
 
 # Configure dataset, model, and training callbacks
 def main():
     speakers = ['s1']
-    train, test = data_pipeline_func(speakers=speakers, batch_size=1)
-
-    model = create_dnn_architecture()
-    model.compile(optimizer=Adam(learning_rate=0.0001), loss=CTCLoss)
-
-    checkpoint_callback = ModelCheckpoint(os.path.join('models', 'checkpoint.weights.h5'), monitor='loss', save_weights_only=True)
-    schedule_callback = LearningRateScheduler(scheduler)
-    example_callback = ProduceExample(test)
-
-    model.fit(train, validation_data=test, epochs=40, callbacks=[checkpoint_callback, schedule_callback, example_callback])
+    train(dataset_path=DATASET_PATH, speakers=speakers, batch_size=BATCH_SIZE)
 
 if __name__ == '__main__':
     main()
